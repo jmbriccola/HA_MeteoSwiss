@@ -38,6 +38,32 @@ async def test_get_latest_observation_uses_stac(session, fixture_text):
     assert obs.temperature == 13.1
 
 
+async def test_get_latest_observation_raises_when_no_features(session):
+    items_url = f"{const.STAC_BASE_URL}/collections/{const.COLLECTION_SMN}/items?station=XXX"
+    from custom_components.meteoswiss.api import StacError
+
+    with aioresponses() as m:
+        m.get(items_url, body='{"type":"FeatureCollection","features":[]}', status=200)
+        client = MeteoSwissClient(session)
+        with pytest.raises(StacError):
+            await client.get_latest_observation("XXX")
+
+
+async def test_get_latest_observation_raises_when_no_csv_asset(session):
+    items_url = f"{const.STAC_BASE_URL}/collections/{const.COLLECTION_SMN}/items?station=BER"
+    no_csv_body = (
+        '{"type":"FeatureCollection","features":['
+        '{"id":"x","assets":{"preview.png":{"href":"u","type":"image/png"}}}]}'
+    )
+    from custom_components.meteoswiss.api import StacError
+
+    with aioresponses() as m:
+        m.get(items_url, body=no_csv_body, status=200)
+        client = MeteoSwissClient(session)
+        with pytest.raises(StacError):
+            await client.get_latest_observation("BER")
+
+
 async def test_get_plz_detail_returns_detail(session, fixture_text):
     with aioresponses() as m:
         m.get(

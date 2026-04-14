@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .client import MeteoSwissClient
+from .errors import MeteoSwissError
 from .models import (
     ForecastDay,
     ForecastHour,
@@ -20,6 +21,7 @@ __all__ = [
     "ForecastHour",
     "LightningStrike",
     "MeteoSwissClient",
+    "MeteoSwissError",
     "Observation",
     "PlzDetail",
     "PlzError",

@@ -3,16 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import aiohttp
 
 from .const import DEFAULT_TIMEOUT_SECONDS, PLZ_DETAIL_URL, USER_AGENT
+from .errors import MeteoSwissError
 from .models import ForecastDay, ForecastHour, PollenReading, Warning
 
 
-class PlzError(RuntimeError):
+class PlzError(MeteoSwissError):
     """Raised for HTTP or parse failures against plzDetail."""
 
 
@@ -131,13 +132,12 @@ def _hourly_from_graph(graph: dict[str, Any]) -> list[ForecastHour]:
     if start_ms is None:
         return []
     start = _ms_to_datetime(int(start_ms))
+    base = start.replace(minute=0, second=0, microsecond=0)
     result: list[ForecastHour] = []
     for i, t in enumerate(temps):
         result.append(
             ForecastHour(
-                time=start.replace(minute=0, second=0, microsecond=0).replace(
-                    hour=(start.hour + i) % 24
-                ),
+                time=base + timedelta(hours=i),
                 temperature=float(t),
                 temperature_min=float(temps_min[i]) if i < len(temps_min) else float(t),
                 temperature_max=float(temps_max[i]) if i < len(temps_max) else float(t),

@@ -7,9 +7,10 @@ from typing import Any
 import aiohttp
 
 from .const import DEFAULT_TIMEOUT_SECONDS, STAC_BASE_URL, USER_AGENT
+from .errors import MeteoSwissError
 
 
-class StacError(RuntimeError):
+class StacError(MeteoSwissError):
     """Raised for HTTP errors or malformed STAC payloads."""
 
 
@@ -21,10 +22,20 @@ class StacClient:
         self._timeout = aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT_SECONDS)
         self._headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
 
-    async def get_collection_items(self, collection_id: str) -> list[dict[str, Any]]:
+    async def get_collection_items(
+        self,
+        collection_id: str,
+        *,
+        params: dict[str, str] | None = None,
+    ) -> list[dict[str, Any]]:
         url = f"{STAC_BASE_URL}/collections/{collection_id}/items"
         try:
-            async with self._session.get(url, headers=self._headers, timeout=self._timeout) as resp:
+            async with self._session.get(
+                url,
+                headers=self._headers,
+                timeout=self._timeout,
+                params=params,
+            ) as resp:
                 if resp.status >= 400:
                     raise StacError(f"GET {url} -> {resp.status}")
                 payload = await resp.json(content_type=None)

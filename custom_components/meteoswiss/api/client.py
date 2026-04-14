@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import aiohttp
 
-from .const import COLLECTION_SMN, DEFAULT_TIMEOUT_SECONDS, STAC_BASE_URL, USER_AGENT
+from .const import COLLECTION_SMN
 from .csv_parser import parse_smn_observations
 from .models import Observation
 from .plz import PlzDetail, PlzDetailClient
@@ -21,17 +21,9 @@ class MeteoSwissClient:
 
     async def get_latest_observation(self, station_code: str) -> Observation:
         """Return the newest SMN observation for a station code (e.g. 'BER')."""
-        url = f"{STAC_BASE_URL}/collections/{COLLECTION_SMN}/items?station={station_code}"
-        timeout = aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT_SECONDS)
-        headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
-        try:
-            async with self._session.get(url, headers=headers, timeout=timeout) as resp:
-                if resp.status >= 400:
-                    raise StacError(f"GET {url} -> {resp.status}")
-                payload = await resp.json(content_type=None)
-        except aiohttp.ClientError as err:
-            raise StacError(f"GET {url} failed: {err}") from err
-        features = payload.get("features", [])
+        features = await self.stac.get_collection_items(
+            COLLECTION_SMN, params={"station": station_code}
+        )
         if not features:
             raise StacError(f"no items for station {station_code}")
         assets = features[0].get("assets", {})

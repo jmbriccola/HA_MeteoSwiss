@@ -107,3 +107,26 @@ async def test_fetch_validates_plz_length(session):
         await client.fetch(123)
     with pytest.raises(ValueError):
         await client.fetch(12345)
+
+
+def test_hourly_from_graph_advances_date_across_midnight():
+    # start = 2026-04-14 22:00 UTC, 30 hourly entries → last entry should be on 2026-04-16 03:00
+    # Epoch ms: int(datetime(2026, 4, 14, 22, 0, tzinfo=UTC).timestamp() * 1000) == 1776204000000
+    from custom_components.meteoswiss.api.plz import _hourly_from_graph
+
+    start_ms = 1776204000000  # 2026-04-14 22:00 UTC
+    graph = {
+        "start": start_ms,
+        "temperatureMean1h": [float(i) for i in range(30)],
+        "temperatureMin1h": [float(i) for i in range(30)],
+        "temperatureMax1h": [float(i) for i in range(30)],
+        "precipitationMean1h": [0.0] * 30,
+        "windSpeed1h": [0.0] * 30,
+        "gustPeak1h": [0.0] * 30,
+        "windDirection1h": [0.0] * 30,
+    }
+    hours = _hourly_from_graph(graph)
+    assert len(hours) == 30
+    assert hours[0].time == datetime(2026, 4, 14, 22, 0, tzinfo=UTC)
+    assert hours[2].time == datetime(2026, 4, 15, 0, 0, tzinfo=UTC)  # midnight wrap
+    assert hours[29].time == datetime(2026, 4, 16, 3, 0, tzinfo=UTC)  # +29h from start

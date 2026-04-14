@@ -54,6 +54,26 @@ async def test_get_asset_bytes_returns_body(session):
     assert data.startswith(b"\x89PNG")
 
 
+async def test_get_asset_bytes_raises_on_404(session):
+    url = "https://data.geo.admin.ch/ch.meteoschweiz.ogd-radar/missing.png"
+    with aioresponses() as m:
+        m.get(url, status=404)
+        client = StacClient(session)
+        with pytest.raises(StacError):
+            await client.get_asset_bytes(url)
+
+
+async def test_get_collection_items_passes_params(session, fixture_text):
+    expected_url = f"{const.STAC_BASE_URL}/collections/{const.COLLECTION_SMN}/items?station=BER"
+    with aioresponses() as m:
+        m.get(expected_url, body=fixture_text("stac_item_smn.json"), status=200)
+        client = StacClient(session)
+        features = await client.get_collection_items(
+            const.COLLECTION_SMN, params={"station": "BER"}
+        )
+    assert len(features) == 1
+
+
 async def test_client_sets_user_agent(session):
     url = f"{const.STAC_BASE_URL}/collections/{const.COLLECTION_SMN}/items"
     captured: dict[str, str] = {}
