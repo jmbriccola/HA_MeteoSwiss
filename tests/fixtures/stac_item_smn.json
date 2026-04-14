@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "ogd-smn-ber",
+      "properties": {
+        "datetime": "2026-04-14T07:10:00Z"
+      },
+      "assets": {
+        "ogd-smn-ber-now.csv": {
+          "href": "https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/ber/ogd-smn-ber-now.csv",
+          "type": "text/csv"
+        }
+      }
+    }
+  ],
+  "links": []
+}
