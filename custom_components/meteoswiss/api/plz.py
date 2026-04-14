@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Any
 
 import aiohttp
 
@@ -51,9 +52,7 @@ class PlzDetailClient:
         # The endpoint expects the PLZ suffixed with 00 (historical PLZ6 format).
         url = f"{PLZ_DETAIL_URL}?plz={postal_code * 100}"
         try:
-            async with self._session.get(
-                url, headers=self._headers, timeout=self._timeout
-            ) as resp:
+            async with self._session.get(url, headers=self._headers, timeout=self._timeout) as resp:
                 if resp.status >= 400:
                     raise PlzError(f"GET {url} -> {resp.status}")
                 payload = await resp.json(content_type=None)
@@ -62,7 +61,7 @@ class PlzDetailClient:
         return _parse_plz_detail(payload)
 
 
-def _parse_plz_detail(payload: dict) -> PlzDetail:
+def _parse_plz_detail(payload: dict[str, Any]) -> PlzDetail:
     try:
         current_raw = payload["currentWeather"]
         current = CurrentWeather(
@@ -120,7 +119,7 @@ def _parse_plz_detail(payload: dict) -> PlzDetail:
         raise PlzError(f"malformed plzDetail payload: {err}") from err
 
 
-def _hourly_from_graph(graph: dict) -> list[ForecastHour]:
+def _hourly_from_graph(graph: dict[str, Any]) -> list[ForecastHour]:
     start_ms = graph.get("start")
     temps = graph.get("temperatureMean1h", [])
     temps_min = graph.get("temperatureMin1h", [])

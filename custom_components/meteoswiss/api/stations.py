@@ -48,9 +48,7 @@ def parse_stations_csv(raw: str) -> list[Station]:
     return list(seen.values())
 
 
-def nearest_station(
-    stations: list[Station], *, latitude: float, longitude: float
-) -> Station:
+def nearest_station(stations: list[Station], *, latitude: float, longitude: float) -> Station:
     """Return the station closest to the given coordinates."""
     if not stations:
         raise ValueError("station list is empty")

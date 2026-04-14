@@ -53,7 +53,7 @@ def parse_smn_observations(csv_text: str) -> list[Observation]:
             Observation(
                 station=row["stn"].strip(),
                 timestamp=parse_timestamp_utc(row["time"]),
-                **kwargs,  # type: ignore[arg-type]
+                **kwargs,
             )
         )
     return observations

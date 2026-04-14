@@ -60,9 +60,7 @@ async def test_client_sets_user_agent(session):
 
     def handler(_url, **kwargs):
         captured.update(kwargs.get("headers", {}))
-        return CallbackResult(
-            status=200, body='{"type":"FeatureCollection","features":[]}'
-        )
+        return CallbackResult(status=200, body='{"type":"FeatureCollection","features":[]}')
 
     with aioresponses() as m:
         m.get(url, callback=handler)

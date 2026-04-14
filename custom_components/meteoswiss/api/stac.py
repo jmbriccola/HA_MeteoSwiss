@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import aiohttp
 
 from .const import DEFAULT_TIMEOUT_SECONDS, STAC_BASE_URL, USER_AGENT
@@ -19,12 +21,10 @@ class StacClient:
         self._timeout = aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT_SECONDS)
         self._headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
 
-    async def get_collection_items(self, collection_id: str) -> list[dict]:
+    async def get_collection_items(self, collection_id: str) -> list[dict[str, Any]]:
         url = f"{STAC_BASE_URL}/collections/{collection_id}/items"
         try:
-            async with self._session.get(
-                url, headers=self._headers, timeout=self._timeout
-            ) as resp:
+            async with self._session.get(url, headers=self._headers, timeout=self._timeout) as resp:
                 if resp.status >= 400:
                     raise StacError(f"GET {url} -> {resp.status}")
                 payload = await resp.json(content_type=None)

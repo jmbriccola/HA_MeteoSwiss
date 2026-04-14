@@ -13,8 +13,8 @@ COLLECTION_RADAR: Final[str] = "ch.meteoschweiz.ogd-radar"
 COLLECTION_LIGHTNING: Final[str] = "ch.meteoschweiz.ogd-lightning"
 
 STATIONS_META_URL: Final[str] = (
-    f"{STAC_BASE_URL}/collections/{COLLECTION_SMN}/items"
-    "?forecast=no&meta=yes"  # placeholder — real URL for metadata asset resolved at runtime in Plan 2
+    # placeholder — real URL for metadata asset resolved at runtime in Plan 2
+    f"{STAC_BASE_URL}/collections/{COLLECTION_SMN}/items?forecast=no&meta=yes"
 )
 
 DEFAULT_TIMEOUT_SECONDS: Final[int] = 30
